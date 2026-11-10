@@ -11,5 +11,5 @@ app.use((err, req, res, next) => {
   console.error(err.message);
   res.status(500).json({ mensaje: 'Error interno del servidor' });
 });
-
+//sirve para export la aplicacion
 module.exports = app;
