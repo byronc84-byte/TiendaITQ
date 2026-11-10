@@ -1,0 +1,121 @@
+const productos =[
+{id:1 , nombre: 'Mouse', precio: 12.5},
+{id:3 , nombre:'Monitor', precio: 100}
+];
+
+//push ; agrega al final
+
+productos.push({id: 4 , nombre:'Parlante', precio:30});
+
+//find ; busca UNO que cumpla la condicion
+
+const encontrado = productos.find((p)=> p.id === 3);
+console.log(encontrado.nombre, encontrado.precio);   //monitor
+
+//filter ; se queda con TODOS los que cumplan
+
+const SinMouse = productos.filter((p)=> p.id !==1);
+console.log(SinMouse.length); //2
+
+console.log(productos) 
+
+
+/////////////////////////////////////////////////////////////////////
+const express = require('express');
+const pool = require('./BaseDeDatos/db.js');
+const app = express();
+app.use(express.json());
+
+let productos = [
+  { id: 1, nombre: 'mouse', precio: 12.5, stock: 20 },
+  { id: 2, nombre: 'teclado', precio: 25, stock: 0 },
+  { id: 3, nombre: 'monitor', precio: 180, stock: 5 }
+];
+
+let siguienteId = 4;
+
+// Obtener todos los productos
+app.get('/verProductos', (req, res) => {
+  res.json(productos);
+});
+
+// Obtener un producto por ID
+app.get('/verProductos/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const producto = productos.find(p => p.id === id);
+
+  if (!producto) {
+    return res.status(404).json({ mensaje: 'Producto no encontrado' });
+  }
+
+  res.status(200).json(producto);
+});
+
+//post
+
+app.post('/productos',(req,res)=>{
+  const datos = req.body;
+
+ if (!datos.nombre || !datos.precio || datos.precio <= 0) {
+    return res.status(400).json({ mensaje: 'Datos inválidos' });
+  }
+  const nuevo = {
+    id: siguienteId,
+    nombre: datos.nombre,
+    precio: datos.precio,
+    stock: datos.stock ,
+    categoria: datos.categoria
+  };
+  siguienteId = siguienteId + 1;
+
+  productos.push(nuevo);           // lo agregamos a la lista
+  res.status(201).json("El producto se creo correctamente",nuevo);     // 201 = creado
+});
+
+app.put('/productos/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const producto = productos.find((p) => p.id === id);
+
+  if (!producto) {
+    return res.status(404).json({ mensaje: 'Producto no encontrado' });
+  }
+
+  const datos = req.body;
+  if (!datos.nombre || !datos.precio || datos.precio <= 0) {
+    return res.status(400).json({ mensaje: 'Datos inválidos' });
+  }
+
+  producto.nombre = datos.nombre;
+  producto.precio = datos.precio;
+  producto.stock = datos.stock || 0;
+  res.status(200).json(producto);
+});
+
+// DELETE /productos/2 → eliminar el producto 2
+app.delete('/productos/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const producto = productos.find((p) => p.id === id);
+
+  if (!producto) {
+    return res.status(404).json({ mensaje: 'Producto no encontrado' });
+  }
+
+  // Nos quedamos con todos MENOS el que tiene ese id
+  productos = productos.filter((p) => p.id !== id);
+  res.status(204).send();   // 204 = listo, sin contenido
+});
+
+// Ruta de prueba: le pregunta la hora a PostgreSQL
+app.get('/test-db', async (req, res) => {
+  try{
+    const result = await pool.query('SELECT NOW()');
+    res.status(200).json({message:'Conexion exitosa a la base de datos', time: result.rows[0].now});
+      }catch(error){
+        console.error('error al conectar a la base de datos',error);
+        res.status(500).json({message:'Error al conectar a la base de datos',error:error.message});
+      }
+    });
+    
+app.listen(3000, () => {
+  console.log('Servidor listo en el puerto 3000');
+});
