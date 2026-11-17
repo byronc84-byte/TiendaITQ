@@ -2,34 +2,44 @@
 const pool = require('../configdb/db');
 
 async function listarProducto() {
-  const r = await pool.query('SELECT * FROM productos ORDER BY id');
+  const r = await pool.query( `SELECT p.id, p.nombre, p.precio, p.stock,
+                p.categoria_id, c.nombre AS categoria
+         FROM productos p 
+         JOIN categorias c ON c.id = p.categoria_id
+         WHERE p.activo = true
+         ORDER BY p.id`);
   return r.rows;
 }
 
 async function obtenerProductoPorId(id) {
-  const r = await pool.query('SELECT * FROM productos WHERE id = $1', [id]);
+  const r = await pool.query( `SELECT p.id, p.nombre, p.precio, p.stock,
+                p.categoria_id, c.nombre AS categoria
+         FROM productos p
+         JOIN categorias c ON c.id = p.categoria_id
+         WHERE p.id = $1 AND p.activo = true`, [id]);
   return r.rows[0];                       // undefined si no existe
 }
 
-async function crearProducto({ nombre, precio, stock }) {
+async function crearProducto({ nombre, precio, stock, categoria_id}) {
   const r = await pool.query(
-    `INSERT INTO productos (nombre, precio, stock)
-     VALUES ($1, $2, $3) RETURNING *`,
-    [nombre, precio, stock || 0]
-  );
+    `INSERT INTO productos (nombre, precio, stock, categoria_id)
+         VALUES ($1, $2, $3, $4) RETURNING *`,
+        [nombre, precio, stock, categoria_id]);
+
   return r.rows[0];
 }
-async function actualizarProducto(id, { nombre, precio, stock }) {
+async function actualizarProducto(id, { nombre, precio, stock, categoria_id }) {
   const r = await pool.query(
-    `UPDATE productos SET nombre = $1, precio = $2, stock = $3
-     WHERE id = $4 RETURNING *`,
-    [nombre, precio, stock || 0, id]
-  );
+     `UPDATE productos
+         SET nombre = $1, precio = $2, stock = $3, categoria_id = $4
+         WHERE id = $5 AND activo = true RETURNING *`,
+        [nombre, precio, stock, categoria_id, id]);
   return r.rows[0];                       // undefined si no existe
 }
 
 async function eliminarProducto(id) {
-  const r = await pool.query('DELETE FROM productos WHERE id = $1', [id]);
+  const r = await pool.query(`UPDATE productos SET activo = false
+         WHERE id = $1 AND activo = true RETURNING *`, [id]);
   return r.rowCount > 0;                  // true si borró algo
 }
 

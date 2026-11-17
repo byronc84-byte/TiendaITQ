@@ -4,12 +4,15 @@ const pool = require('../configdb/db');
  
 //Funciones de Listar
 async function listarCategorias(){
-    const r = await pool.query('SELECT * FROM categorias');
+    const r = await pool.query(  `SELECT id, nombre FROM categorias
+         WHERE activo = true ORDER BY id`);
     return r.rows;
 }
 //Funciones de Obtener por ID
 async function obtenerCategoriaPorId(id){
-    const r = await pool.query('SELECT * FROM categorias WHERE id = $1', [id]);
+    const r = await pool.query(        `SELECT id, nombre FROM categorias
+         WHERE id = $1 AND activo = true`, [id]);
+
     return r.rows[0];
 }
  
@@ -25,15 +28,23 @@ async function actualizarCategoria(id, nombre){
 }
 //Funcion de Eliminar
 async function eliminarCategoria(id){
-    const r = await pool.query('DELETE FROM categorias WHERE id = $1 RETURNING *', [id]);
-    return r.rows[0];
+    const r = await pool.query(`UPDATE categorias SET activo = false
+         WHERE id = $1 AND activo = true RETURNING *`, [id]);
 }
  
+async function contarProductosActivos(id){
+    const r = await pool.query(
+        `SELECT COUNT(*)::int AS total FROM productos
+         WHERE categoria_id = $1 AND activo = true`, [id]);
+    return r.rows[0].total;
+}
+
 //Exportar las funciones
 module.exports = {
     listarCategorias,
     obtenerCategoriaPorId,
     crearCategoria,
     actualizarCategoria,
-    eliminarCategoria
+    eliminarCategoria,
+    contarProductosActivos
 }
