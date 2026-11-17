@@ -2,7 +2,7 @@
 const { Router } = require('express');
  
 //Llamamos al controlador de productos
-const control = require('../Controllers/ControllerCategoria.js');
+const control = require('../Controller/ControllerCategoria.js');
  
 const routesCategoria = Router();
  
