@@ -5,7 +5,7 @@ const routesProductos = require('./routes/routesProductos.js');
 //Llamar a la ruta de Categoria
 const routesCategoria = require('./routes/routesCategoria.js');
 const routesAuth = require('./routes/routesAuth.js');
- 
+const routesPedido = require('./routes/routesPedido.js');
 //Crear una aplicacion de express
 const app = express();
 app.use(express.json());
@@ -17,6 +17,8 @@ app.use('/productos', routesProductos);
 app.use('/categorias',routesCategoria);
 
 app.use('/auth',routesAuth);
+
+app.use('/pedidos',routesPedido);
  
 //Ruta no encontrada (404)
 app.use((req, res) => {

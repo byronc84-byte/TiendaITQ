@@ -23,13 +23,14 @@ async function crearCategoria(nombre){
 }
 //Funciones de Actualizar
 async function actualizarCategoria(id, nombre){
-    const r = await pool.query('UPDATE categorias SET nombre = $1 WHERE id = $2 RETURNING *', [nombre, id]);
+    const r = await pool.query('UPDATE categorias SET nombre = $1 WHERE id = $2 AND activo = true RETURNING *', [nombre, id]);
     return r.rows[0];
 }
 //Funcion de Eliminar
 async function eliminarCategoria(id){
     const r = await pool.query(`UPDATE categorias SET activo = false
          WHERE id = $1 AND activo = true RETURNING *`, [id]);
+    return r.rows[0];
 }
  
 async function contarProductosActivos(id){

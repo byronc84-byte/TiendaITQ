@@ -9,11 +9,11 @@ async function registro(req, res) {
     const { nombre, email, password } = req.body ?? {};
     if (!nombre || !validarEmail(email) || !validarPassword(password)) {
         return res.status(400).json({
-            error: 'Nombre, email válido y clave de 8 caracteres o más' });
+            error: 'Nombre, email válido y clave de 6 caracteres o más' });
     }
     try {
         // ¿Ese email ya tiene cuenta?
-        const existe = await Cliente.buscarPorEmail(email.toLowerCase());
+        const existe = await Cliente.obtenerClientePorCorreo(email.toLowerCase());
         if (existe) {
             return res.status(409).json({ error: 'El email ya está registrado' });
         }
@@ -34,7 +34,7 @@ async function login(req, res) {
     }
     try {
         // 1. ¿Existe el cliente?
-        const cliente = await Cliente.buscarPorEmail(email.toLowerCase());
+        const cliente = await Cliente.obtenerClientePorCorreo(email.toLowerCase());
         // 2. ¿La clave coincide con el hash guardado?
         const ok = cliente && await bcrypt.compare(password, cliente.password);
         if (!ok) {

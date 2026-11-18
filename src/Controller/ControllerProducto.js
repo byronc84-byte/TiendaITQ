@@ -40,7 +40,7 @@ async function crearProducto(req, res) {
         return res.status(400).json({ error: 'La categoría no existe' });
     }
     const nuevo = await Producto.crearProducto(
-        nombre, precio, stock, categoria_id);
+        { nombre, precio, stock, categoria_id });
     res.status(201).json(nuevo);
 }
 
@@ -58,7 +58,7 @@ async function actualizarProducto(req, res) {
         return res.status(400).json({ error: 'La categoría no existe' });
     }
     const actualizado = await Producto.actualizarProducto(
-        id, nombre, precio, stock, categoria_id);
+        id, { nombre, precio, stock, categoria_id });
     if (!actualizado) {
         return res.status(404).json({ error: 'Producto no encontrado' });
     }
